@@ -1,17 +1,23 @@
 # Custom Image Augmentation Layers with Keras
 
-This repository contains an implementation of 4 custom image augmentation layers:
-- **RandomGaussianNoise**: applies additive normal-distributed pixel noise to the image with given standard deviation
-- **RandomResizedCrop**: crops and resizes a part of the image with given aspect ratio and zoom range to its original resolution
-- **RandomColorJitter**: distorts the color distibutions of images in torchvision-style
-- **RandomColorAffine**: distorts the color distibutions of images by applying a random affine transformation in color space
+This repository contains an implementation of 4 custom image augmentation layers
+in Keras:
+- **RandomGaussianNoise**: applies additive normal-distributed pixel noise to
+  the image with given standard deviation
+- **RandomResizedCrop**: crops and resizes a part of the image with given aspect
+  ratio and zoom range to its original resolution
+- **RandomColorJitter**: distorts the color distibutions of images in
+  torchvision-style
+- **RandomColorAffine**: distorts the color distibutions of images by applying a
+  random affine transformation in color space
 
-Using custom Keras preprocessing layers for data augmentation has the following two advantages:
+Using custom Keras preprocessing layers for data augmentation has the following
+two advantages:
 - the data augmentation will run on GPU in batches, so the training will not be
-bottlenecked by the data pipeline in environments with constrained CPU resources (such
-as a Colab Notebook, or a personal machine)
-- deployment is easier as the data preprocessing pipeline is encapsulated in the model,
-and does not have to be reimplemented when deploying it
+  bottlenecked by the data pipeline in environments with constrained CPU
+  resources (such as a Colab Notebook, or a personal machine)
+- deployment is easier as the data preprocessing pipeline is encapsulated in the
+  model, and does not have to be reimplemented when deploying it
 
 ## Usage: minimal example
 ``` python
