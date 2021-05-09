@@ -1,4 +1,5 @@
 import random
+import math
 import tensorflow as tf
 
 from tensorflow.keras import layers
@@ -157,28 +158,70 @@ class RandomColorJitter(layers.Layer):
 
 # distorts the color distibutions of images
 class RandomColorAffine(layers.Layer):
-    def __init__(self, brightness=0.3, jitter=0.1, **kwargs):
+    def __init__(self, brightness=0.2, saturation=0.2, hue=0.1, jitter=0.1, **kwargs):
         super().__init__(**kwargs)
 
         self.brightness = brightness
+        self.saturation = saturation
+        self.hue = hue
         self.jitter = jitter
 
     def call(self, images, training=True):
         if training:
             batch_size = tf.shape(images)[0]
 
-            # same for all colors
-            brightness_scales = 1 + tf.random.uniform(
-                (batch_size, 1, 1, 1), minval=-self.brightness, maxval=self.brightness
-            )
-            # different for all colors
-            jitter_matrices = tf.random.uniform(
+            # jitter: mixes colors across channels by applying a random affine transformation in color space
+            color_mixers = tf.eye(3, batch_shape=[batch_size, 1]) + tf.random.uniform(
                 (batch_size, 1, 3, 3), minval=-self.jitter, maxval=self.jitter
             )
 
-            color_transforms = (
-                tf.eye(3, batch_shape=[batch_size, 1]) * brightness_scales
-                + jitter_matrices
+            # hue: applies a random rotation transformation around the main diagonal in color space
+            rotation_angles = (
+                tf.random.uniform(
+                    (batch_size, 1, 1, 1), minval=-self.hue, maxval=self.hue
+                )
+                * math.pi
             )
-            images = tf.clip_by_value(tf.matmul(images, color_transforms), 0, 1)
+            color_rotators = (
+                tf.cos(rotation_angles) * tf.eye(3, batch_shape=[batch_size, 1])
+                + tf.linalg.cross(
+                    tf.sin(rotation_angles)
+                    / tf.sqrt(3.0)
+                    * tf.ones((batch_size, 1, 3, 3)),
+                    tf.eye(3, batch_shape=[batch_size, 1]),
+                )
+                + (1 - tf.cos(rotation_angles)) / 3
+            )
+
+            # saturation: applies a random stretching transformation along the main diagonal in color space
+            saturation_factors = tf.exp(
+                tf.random.uniform(
+                    (batch_size, 1, 1, 1),
+                    minval=-self.saturation,
+                    maxval=self.saturation,
+                )
+            )
+            color_stretchers = (
+                saturation_factors * tf.eye(3, batch_shape=[batch_size, 1])
+                + (1 - saturation_factors) / 3
+            )
+
+            # brightness: applies a random scaling transformation in color space
+            color_scalers = tf.exp(
+                tf.random.uniform(
+                    (batch_size, 1, 1, 1),
+                    minval=-self.brightness,
+                    maxval=self.brightness,
+                )
+            )
+
+            images = tf.clip_by_value(
+                images
+                @ color_mixers
+                @ color_rotators
+                @ color_stretchers
+                * color_scalers,
+                0,
+                1,
+            )
         return images

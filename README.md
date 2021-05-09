@@ -8,8 +8,8 @@ in Keras:
   ratio and zoom range to its original resolution
 - **RandomColorJitter**: distorts the color distibutions of images in
   torchvision-style
-- **RandomColorAffine**: distorts the color distibutions of images by applying a
-  random affine transformation in color space
+- **RandomColorAffine**: distorts the color distibutions of images by applying
+  random affine transformations in color space
 
 Using custom Keras preprocessing layers for data augmentation has the following
 two advantages:
@@ -18,6 +18,9 @@ two advantages:
   resources (such as a Colab Notebook, or a personal machine)
 - deployment is easier as the data preprocessing pipeline is encapsulated in the
   model, and does not have to be reimplemented when deploying it
+
+The default augmentation parameters correspond to mild, conservative image
+augmentations.
 
 ## Usage: minimal example
 ``` python
@@ -67,6 +70,8 @@ model.fit(train_dataset, epochs=num_epochs, validation_data=test_dataset)
 ```
 
 ## Visualizations
+![augmented car](./assets/augmentations_5.png)
+![augmented peacock](./assets/augmentations_6.png)
 ![augmented bird](./assets/augmentations_13.png)
 ![augmented plane](./assets/augmentations_30.png)
 ![augmented deer](./assets/augmentations_66.png)
